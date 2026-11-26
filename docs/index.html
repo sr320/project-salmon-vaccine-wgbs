@@ -254,6 +254,7 @@
       <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/data/README.md">Data README and sample metadata</a></li>
       <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/code/02-trim.sh">Trimming script</a></li>
       <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/code/03-bismark.sh">Bismark alignment script</a></li>
+      <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/code/04-dedup-methylation.sh">Deduplication and methylation extraction script</a></li>
     </ul>
   </div>
   <div class="card links">
@@ -275,7 +276,7 @@
 <script>
 /* ===== Update this block as the analysis moves forward ===== */
 const DATA = {
-  updated: "2026-11-25 PST, trimming complete",
+  updated: "2026-11-26 PST, alignment in progress",
   steps: [
     { title: "Raw data and metadata", status: "done",
       detail: "4 paired-end libraries received; checksums recorded; <code>Metadata.tsv</code> cleaned." },
@@ -283,10 +284,12 @@ const DATA = {
       detail: "FastQC and MultiQC on all 8 FASTQ files. Bisulfite composition as expected; adaptase tail found at the R2 5′ end." },
     { title: "Trimming", status: "done",
       detail: "cutadapt: adapters and poly-G removed (q20); 15 bp clipped from R2 5′ and R1 3′. 99.1–99.4% of pairs and 87–89% of bases kept; adapter and overrepresented-sequence flags cleared in FastQC." },
-    { title: "Bismark alignment", status: "scheduled", when: "Nov 26, 2:00 AM",
-      detail: "Build Ssal_v3.1 bisulfite index, then align each library (directional, paired-end)." },
-    { title: "Deduplication and methylation calling", status: "planned",
-      detail: "<code>deduplicate_bismark</code>, methylation extraction, M-bias review, conversion-rate check from non-CpG methylation." },
+    { title: "Bismark alignment", status: "running", when: "1 of 4 libraries done",
+      detail: "Ssal_v3.1 bisulfite index built (38 min). Aligning each library in turn (directional, paired-end), about 4 hours per library; expected to finish the evening of Nov 26." },
+    { title: "Deduplication and M-bias check", status: "scheduled", when: "Starts after alignment",
+      detail: "<code>deduplicate_bismark</code> removes PCR duplicates, then the M-bias table shows methylation by read position to decide how many bases to ignore at read ends. Starts automatically via a cron trigger." },
+    { title: "Methylation extraction", status: "planned",
+      detail: "Per-context calls (CpG, CHG, CHH), bedGraph, genome-wide CpG report and strand-merged CpG coverage for DMR tools, using the ignore settings chosen from M-bias. Conversion rate checked from CHH methylation." },
     { title: "Differential methylation", status: "planned",
       detail: "Before vs. after vaccination (n = 2 per group), accounting for the sequencing-run batch." }
   ],
@@ -307,6 +310,10 @@ const DATA = {
       title: "Two replicates per group",
       body: "With n = 2 per condition, only large and consistent methylation differences will be detectable, and one atypical library (T0_1) has outsized influence.",
       action: "<b>Next:</b> favour region-level tests and report effect sizes alongside p-values." },
+    { level: "info", tag: "Early check",
+      title: "Bisulfite conversion looks efficient",
+      body: "In a test extraction on about 100,000 read pairs of <code>SsParrT0_1</code>, CHH methylation was 0.4% (about 99.6% conversion) and CpG methylation 85.3%, typical for fish.",
+      action: "<b>Provisional:</b> one small slice of one library; to be confirmed for all four after extraction." },
     { level: "resolved", tag: "Resolved",
       title: "Sample sheet formatting fixed",
       body: "<code>Metadata.tsv</code> had Windows line endings, a leading space in “After vaccination” values, and no link between R1 and R2 files. Cleaned, with <code>Library</code> and <code>Read</code> columns added.",
@@ -344,7 +351,7 @@ const openIssues = DATA.findings.filter((f) => f.level === "serious" || f.level 
 const kpis = [
   { label: "Libraries", value: DATA.samples.length, note: "2 before · 2 after vaccination" },
   { label: "Read pairs", value: (totalPairs / 1e6).toFixed(0) + "M", note: "2 × 151 bp, ~7–8× raw coverage each" },
-  { label: "Pipeline steps done", value: doneSteps + " / " + DATA.steps.length, note: (DATA.steps.find((s) => s.status === "running") || DATA.steps.find((s) => s.status === "scheduled"))?.title + " next" },
+  { label: "Pipeline steps done", value: doneSteps + " / " + DATA.steps.length, note: (DATA.steps.find((s) => s.status === "running") ? DATA.steps.find((s) => s.status === "running").title + " in progress" : DATA.steps.find((s) => s.status === "scheduled")?.title + " next") },
   { label: "Open sample issues", value: openIssues, note: "Batch and insert size, both T0_1" }
 ];
 $("kpis").innerHTML = kpis.map((k) =>
