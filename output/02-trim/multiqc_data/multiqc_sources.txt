@@ -1,0 +1,17 @@
+Module	Section	Sample Name	Source
+Cutadapt	all_sections	SsParrT0_1	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/SsParrT0_1.pass1.log
+Cutadapt	all_sections	SsParrT0_1.pass2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/SsParrT0_1.pass2.log
+Cutadapt	all_sections	SsParrT0_2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/SsParrT0_2.pass1.log
+Cutadapt	all_sections	SsParrT0_2.pass2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/SsParrT0_2.pass2.log
+Cutadapt	all_sections	SsParrVac_1	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/SsParrVac_1.pass1.log
+Cutadapt	all_sections	SsParrVac_1.pass2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/SsParrVac_1.pass2.log
+Cutadapt	all_sections	SsParrVac_2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/SsParrVac_2.pass1.log
+Cutadapt	all_sections	SsParrVac_2.pass2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/SsParrVac_2.pass2.log
+FastQC	all_sections	SsParrT0_1_1	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/fastqc/SsParrT0_1_1.trimmed_fastqc.zip
+FastQC	all_sections	SsParrT0_1_2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/fastqc/SsParrT0_1_2.trimmed_fastqc.zip
+FastQC	all_sections	SsParrT0_2_1	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/fastqc/SsParrT0_2_1.trimmed_fastqc.zip
+FastQC	all_sections	SsParrT0_2_2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/fastqc/SsParrT0_2_2.trimmed_fastqc.zip
+FastQC	all_sections	SsParrVac_1_1	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/fastqc/SsParrVac_1_1.trimmed_fastqc.zip
+FastQC	all_sections	SsParrVac_1_2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/fastqc/SsParrVac_1_2.trimmed_fastqc.zip
+FastQC	all_sections	SsParrVac_2_1	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/fastqc/SsParrVac_2_1.trimmed_fastqc.zip
+FastQC	all_sections	SsParrVac_2_2	/home/shared/8TB_HDD_03/sr320/github/project-salmon-vaccine-wgbs/output/02-trim/fastqc/SsParrVac_2_2.trimmed_fastqc.zip

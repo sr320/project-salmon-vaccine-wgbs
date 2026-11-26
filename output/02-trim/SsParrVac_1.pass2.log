@@ -1,0 +1,19 @@
+This is cutadapt 4.5 with Python 3.10.10
+Command line parameters: -j 6 --interleaved -u -15 -m 20 -o output/02-trim/SsParrVac_1_1.trimmed.fastq.gz -p output/02-trim/SsParrVac_1_2.trimmed.fastq.gz -
+Processing paired-end reads on 6 cores ...
+Finished in 1427.070 s (20.639 µs/read; 2.91 M reads/minute).
+
+=== Summary ===
+
+Total read pairs processed:         69,143,094
+
+== Read fate breakdown ==
+Pairs that were too short:             588,726 (0.9%)
+Pairs written (passing filters):    68,554,368 (99.1%)
+
+Total basepairs processed: 19,473,109,563 bp
+  Read 1: 10,243,353,754 bp
+  Read 2: 9,229,755,809 bp
+Total written (filtered):  18,391,959,118 bp (94.4%)
+  Read 1: 9,184,432,649 bp
+  Read 2: 9,207,526,469 bp
