@@ -1,1 +1,4 @@
-data/*.fastq.gz
+*.fastq.gz
+*.bam
+data/genome/
+output/03-bismark/tmp/
