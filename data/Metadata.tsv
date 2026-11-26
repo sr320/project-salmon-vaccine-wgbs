@@ -1,0 +1,9 @@
+SampleID	Library	Read	Condition	Timepoint	Replicate
+SsParrT0_1_1	SsParrT0_1	R1	Before vaccination	0 ATUs	1
+SsParrT0_1_2	SsParrT0_1	R2	Before vaccination	0 ATUs	1
+SsParrT0_2_1	SsParrT0_2	R1	Before vaccination	0 ATUs	2
+SsParrT0_2_2	SsParrT0_2	R2	Before vaccination	0 ATUs	2
+SsParrVac_1_1	SsParrVac_1	R1	After vaccination	600 ATUs	1
+SsParrVac_1_2	SsParrVac_1	R2	After vaccination	600 ATUs	1
+SsParrVac_2_1	SsParrVac_2	R1	After vaccination	600 ATUs	2
+SsParrVac_2_2	SsParrVac_2	R2	After vaccination	600 ATUs	2
