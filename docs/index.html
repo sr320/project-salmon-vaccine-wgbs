@@ -250,6 +250,7 @@
   <div class="card links">
     <ul>
       <li><a href="reports/raw-multiqc.html">MultiQC report, raw reads</a></li>
+      <li><a href="reports/trimmed-multiqc.html">MultiQC report, trimmed reads</a></li>
       <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/data/README.md">Data README and sample metadata</a></li>
       <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/code/02-trim.sh">Trimming script</a></li>
       <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/code/03-bismark.sh">Bismark alignment script</a></li>
@@ -274,14 +275,14 @@
 <script>
 /* ===== Update this block as the analysis moves forward ===== */
 const DATA = {
-  updated: "2026-11-25 20:00 PST",
+  updated: "2026-11-25 PST, trimming complete",
   steps: [
     { title: "Raw data and metadata", status: "done",
       detail: "4 paired-end libraries received; checksums recorded; <code>Metadata.tsv</code> cleaned." },
     { title: "Raw read QC", status: "done",
       detail: "FastQC and MultiQC on all 8 FASTQ files. Bisulfite composition as expected; adaptase tail found at the R2 5′ end." },
-    { title: "Trimming", status: "running", when: "Started Nov 25",
-      detail: "cutadapt: adapters and poly-G removed (q20); 15 bp clipped from R2 5′ and R1 3′. ~99% of pairs kept in a test run." },
+    { title: "Trimming", status: "done",
+      detail: "cutadapt: adapters and poly-G removed (q20); 15 bp clipped from R2 5′ and R1 3′. 99.1–99.4% of pairs and 87–89% of bases kept; adapter and overrepresented-sequence flags cleared in FastQC." },
     { title: "Bismark alignment", status: "scheduled", when: "Nov 26, 2:00 AM",
       detail: "Build Ssal_v3.1 bisulfite index, then align each library (directional, paired-end)." },
     { title: "Deduplication and methylation calling", status: "planned",
@@ -343,7 +344,7 @@ const openIssues = DATA.findings.filter((f) => f.level === "serious" || f.level 
 const kpis = [
   { label: "Libraries", value: DATA.samples.length, note: "2 before · 2 after vaccination" },
   { label: "Read pairs", value: (totalPairs / 1e6).toFixed(0) + "M", note: "2 × 151 bp, ~7–8× raw coverage each" },
-  { label: "Pipeline steps done", value: doneSteps + " / " + DATA.steps.length, note: DATA.steps.find((s) => s.status === "running")?.title + " in progress" },
+  { label: "Pipeline steps done", value: doneSteps + " / " + DATA.steps.length, note: (DATA.steps.find((s) => s.status === "running") || DATA.steps.find((s) => s.status === "scheduled"))?.title + " next" },
   { label: "Open sample issues", value: openIssues, note: "Batch and insert size, both T0_1" }
 ];
 $("kpis").innerHTML = kpis.map((k) =>
