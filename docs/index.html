@@ -256,6 +256,7 @@
       <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/code/02-trim.sh">Trimming script</a></li>
       <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/code/03-bismark.sh">Bismark alignment script</a></li>
       <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/code/04-dedup-methylation.sh">Deduplication and methylation extraction script</a></li>
+      <li><a href="https://github.com/sr320/project-salmon-vaccine-wgbs/blob/main/code/05-dmr.R">Differential methylation script (DSS)</a></li>
     </ul>
   </div>
   <div class="card links">
@@ -277,7 +278,7 @@
 <script>
 /* ===== Update this block as the analysis moves forward ===== */
 const DATA = {
-  updated: "2026-11-26 08:15 PST, alignment in progress",
+  updated: "2026-11-26 12:55 PST, alignment in progress",
   steps: [
     { title: "Raw data and metadata", status: "done",
       detail: "4 paired-end libraries received; checksums recorded; <code>Metadata.tsv</code> cleaned." },
@@ -291,14 +292,14 @@ const DATA = {
       detail: "<code>deduplicate_bismark</code> removes PCR duplicates, then the M-bias table shows methylation by read position to decide how many bases to ignore at read ends. Starts automatically via a cron trigger." },
     { title: "Methylation extraction", status: "planned",
       detail: "Per-context calls (CpG, CHG, CHH), bedGraph, genome-wide CpG report and strand-merged CpG coverage for DMR tools, using the ignore settings chosen from M-bias. Conversion rate checked from CHH methylation." },
-    { title: "Differential methylation", status: "planned",
-      detail: "Before vs. after vaccination (n = 2 per group), accounting for the sequencing-run batch." }
+    { title: "Differential methylation", status: "planned", when: "Script ready",
+      detail: "DSS with smoothing compares Vac with T0 (n = 2 per group) on CpGs with ≥ 5 reads in all four libraries. Calls single CpGs (difference > 25 points, posterior ≥ 0.999) and regions (≥ 3 CpGs, ≥ 50 bp, ≥ 10-point difference). Each call is flagged when both Vac replicates sit on the same side of both T0 replicates, the more reliable subset at this sample size. Sample correlation and PCA come first, to check the T0_1 batch. The batch cannot be modeled because it falls entirely in the T0 group." }
   ],
   findings: [
     { level: "serious", tag: "Design risk",
       title: "Sequencing run is partly confounded with condition",
       body: "<code>SsParrT0_1</code> was sequenced on a different flowcell and run (22MGM5LT4, run 97) from the other three libraries (22MG7GLT4, lane 6, run 94). With two replicates per group, a run effect on this one library cannot be separated from biology.",
-      action: "<b>Next:</b> check whether T0_1 clusters apart from the others after methylation calling; treat T0-specific signals with caution." },
+      action: "<b>Next:</b> check whether T0_1 clusters apart from the others in the sample PCA from the differential methylation script; treat T0-specific signals with caution." },
     { level: "warning", tag: "Sample quality",
       title: "SsParrT0_1 has many more short inserts",
       body: "6.0% of its R1 reads run into adapter, against 0.45–1.03% for the other libraries. 1.8% of its fragments are 100 bp or shorter, versus 0.3–0.8%. This suggests more DNA fragmentation or a different size selection.",
