@@ -2,3 +2,4 @@
 *.bam
 data/genome/
 output/03-bismark/tmp/
+output/04-methylation/**/*.gz
