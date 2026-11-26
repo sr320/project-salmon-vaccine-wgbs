@@ -172,6 +172,7 @@
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   tr.flagged td { background: color-mix(in srgb, var(--serious) 9%, transparent); }
   .cond { display: inline-flex; align-items: center; gap: 6px; }
+  .pending { color: var(--text-3); font-size: 13px; }
   .flag-icon { color: var(--serious-ink); font-weight: 700; }
 
   footer { margin-top: 40px; font-size: 13px; color: var(--text-3); }
@@ -238,7 +239,7 @@
     <thead>
       <tr>
         <th>Library</th><th>Condition</th><th class="num">Rep</th><th class="num">Read pairs</th>
-        <th>Flowcell · lane</th><th class="num">Adapter read-through</th><th class="num">R1 duplication</th>
+        <th>Flowcell · lane</th><th class="num">Adapter read-through</th><th class="num">R1 duplication</th><th class="num">Unique mapping</th>
       </tr>
     </thead>
     <tbody id="samples"></tbody>
@@ -276,7 +277,7 @@
 <script>
 /* ===== Update this block as the analysis moves forward ===== */
 const DATA = {
-  updated: "2026-11-26 PST, alignment in progress",
+  updated: "2026-11-26 08:15 PST, alignment in progress",
   steps: [
     { title: "Raw data and metadata", status: "done",
       detail: "4 paired-end libraries received; checksums recorded; <code>Metadata.tsv</code> cleaned." },
@@ -285,7 +286,7 @@ const DATA = {
     { title: "Trimming", status: "done",
       detail: "cutadapt: adapters and poly-G removed (q20); 15 bp clipped from R2 5′ and R1 3′. 99.1–99.4% of pairs and 87–89% of bases kept; adapter and overrepresented-sequence flags cleared in FastQC." },
     { title: "Bismark alignment", status: "running", when: "1 of 4 libraries done",
-      detail: "Ssal_v3.1 bisulfite index built (38 min). Aligning each library in turn (directional, paired-end), about 4 hours per library; expected to finish the evening of Nov 26." },
+      detail: "Ssal_v3.1 bisulfite index built (38 min). <code>SsParrT0_1</code> aligned in 4.2 h: 73.3% of pairs mapped uniquely, 16.2% multi-mapped, 10.5% unaligned; reads split evenly between the two strands. Remaining libraries expected the evening of Nov 26 or later (raven is heavily loaded)." },
     { title: "Deduplication and M-bias check", status: "scheduled", when: "Starts after alignment",
       detail: "<code>deduplicate_bismark</code> removes PCR duplicates, then the M-bias table shows methylation by read position to decide how many bases to ignore at read ends. Starts automatically via a cron trigger." },
     { title: "Methylation extraction", status: "planned",
@@ -311,9 +312,9 @@ const DATA = {
       body: "With n = 2 per condition, only large and consistent methylation differences will be detectable, and one atypical library (T0_1) has outsized influence.",
       action: "<b>Next:</b> favour region-level tests and report effect sizes alongside p-values." },
     { level: "info", tag: "Early check",
-      title: "Bisulfite conversion looks efficient",
-      body: "In a test extraction on about 100,000 read pairs of <code>SsParrT0_1</code>, CHH methylation was 0.4% (about 99.6% conversion) and CpG methylation 85.3%, typical for fish.",
-      action: "<b>Provisional:</b> one small slice of one library; to be confirmed for all four after extraction." },
+      title: "Bisulfite conversion is efficient in SsParrT0_1",
+      body: "Across the full <code>SsParrT0_1</code> alignment (2.6 billion cytosines), CHH and CHG methylation are both 0.4%, so conversion is about 99.6%. CpG methylation is 85.1%, typical for fish. This matches the earlier 100,000-pair test.",
+      action: "<b>Pending:</b> the same check for the other three libraries as they finish aligning." },
     { level: "resolved", tag: "Resolved",
       title: "Sample sheet formatting fixed",
       body: "<code>Metadata.tsv</code> had Windows line endings, a leading space in “After vaccination” values, and no link between R1 and R2 files. Cleaned, with <code>Library</code> and <code>Read</code> columns added.",
@@ -324,7 +325,7 @@ const DATA = {
       action: "<b>Needed:</b> kit name and archive location for the data README." }
   ],
   samples: [
-    { lib: "SsParrT0_1",  cond: "Before", rep: 1, pairs: 77603127, fc: "22MGM5LT4 · 1", adapter: 6.04, dup: 21.4, flag: true },
+    { lib: "SsParrT0_1",  cond: "Before", rep: 1, pairs: 77603127, fc: "22MGM5LT4 · 1", adapter: 6.04, dup: 21.4, mapping: 73.3, flag: true },
     { lib: "SsParrT0_2",  cond: "Before", rep: 2, pairs: 68776693, fc: "22MG7GLT4 · 6", adapter: 0.89, dup: 24.7 },
     { lib: "SsParrVac_1", cond: "After",  rep: 1, pairs: 69143094, fc: "22MG7GLT4 · 6", adapter: 1.03, dup: 24.1 },
     { lib: "SsParrVac_2", cond: "After",  rep: 2, pairs: 70172391, fc: "22MG7GLT4 · 6", adapter: 0.45, dup: 24.3 }
@@ -425,6 +426,7 @@ $("samples").innerHTML = DATA.samples.map((s) => `
     <td class="mono">${s.fc}</td>
     <td class="num">${s.adapter.toFixed(2)}%</td>
     <td class="num">${s.dup.toFixed(1)}%</td>
+    <td class="num">${s.mapping != null ? s.mapping.toFixed(1) + "%" : '<span class="pending">Pending</span>'}</td>
   </tr>`).join("");
 </script>
 </body>
