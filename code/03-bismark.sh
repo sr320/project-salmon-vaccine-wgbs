@@ -30,6 +30,12 @@ LIBS="SsParrT0_1 SsParrT0_2 SsParrVac_1 SsParrVac_2"
 PARALLEL=8
 BT2_THREADS=2
 
+# Maximum insert (fragment) length for a valid pair. Bismark's default of
+# 500 bp discarded 10-17% of pairs in SsParrT0_2 and both Vac libraries,
+# whose fragments average ~400 bp with a tail past 500 (checked on 100k-pair
+# subsets: 1000 bp raised SsParrT0_2 unique mapping from 61.7% to 72.6%).
+MAXINS=1000
+
 mkdir -p "$OUT"
 exec >> "$OUT/03-bismark.log" 2>&1
 echo "== start $(date)"
@@ -68,7 +74,7 @@ for l in $LIBS; do
   echo "aligning $l $(date)"
   bismark --genome "$GENOME_DIR" \
     -1 "$TRIM/${l}_1.trimmed.fastq.gz" -2 "$TRIM/${l}_2.trimmed.fastq.gz" \
-    --parallel "$PARALLEL" -p "$BT2_THREADS" \
+    --parallel "$PARALLEL" -p "$BT2_THREADS" --maxins "$MAXINS" \
     --path_to_bowtie2 "$BOWTIE2" --samtools_path "$SAMTOOLS" \
     --temp_dir "$OUT/tmp" -o "$OUT"
   echo "done $l $(date)"

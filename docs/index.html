@@ -278,7 +278,7 @@
 <script>
 /* ===== Update this block as the analysis moves forward ===== */
 const DATA = {
-  updated: "2026-11-26 18:00 PST, alignment in progress",
+  updated: "2026-11-26 19:35 PST, realignment in progress",
   steps: [
     { title: "Raw data and metadata", status: "done",
       detail: "4 paired-end libraries received; checksums recorded; <code>Metadata.tsv</code> cleaned." },
@@ -286,8 +286,8 @@ const DATA = {
       detail: "FastQC and MultiQC on all 8 FASTQ files. Bisulfite composition as expected; adaptase tail found at the R2 5′ end." },
     { title: "Trimming", status: "done",
       detail: "cutadapt: adapters and poly-G removed (q20); 15 bp clipped from R2 5′ and R1 3′. 99.1–99.4% of pairs and 87–89% of bases kept; adapter and overrepresented-sequence flags cleared in FastQC." },
-    { title: "Bismark alignment", status: "running", when: "2 of 4 libraries done",
-      detail: "Ssal_v3.1 bisulfite index built (38 min). <code>SsParrT0_1</code> aligned in 4.2 h (73.3% of pairs unique, 16.2% multi-mapped, 10.5% unaligned) and <code>SsParrT0_2</code> in 4.9 h (61.7% unique, 12.9% multi-mapped, 25.4% unaligned); reads split evenly between the two strands in both. <code>SsParrVac_1</code> started aligning at 14:14 and was about two-thirds done at 17:55, so it should finish around 20:00; <code>SsParrVac_2</code> likely early morning on Nov 27 (raven is heavily loaded)." },
+    { title: "Bismark alignment", status: "running", when: "Restarted Nov 26 19:33",
+      detail: "Realigning all four libraries with a 1,000 bp maximum fragment length (<code>--maxins 1000</code>). The first pass used Bismark's 500 bp default, which discarded the longer fragments in <code>SsParrT0_2</code> and the two Vac libraries (see findings). First-pass results for <code>SsParrT0_1</code> (73.3% unique) and <code>SsParrT0_2</code> (61.7%) are kept for reference. About 5 h per library on the loaded server, so all four should be done around the evening of Nov 27." },
     { title: "Deduplication and M-bias check", status: "scheduled", when: "Starts after alignment",
       detail: "<code>deduplicate_bismark</code> removes PCR duplicates, then the M-bias table shows methylation by read position to decide how many bases to ignore at read ends. Starts automatically via a cron trigger." },
     { title: "Methylation extraction", status: "planned",
@@ -303,11 +303,11 @@ const DATA = {
     { level: "warning", tag: "Sample quality",
       title: "SsParrT0_1 has many more short inserts",
       body: "6.0% of its R1 reads run into adapter, against 0.45–1.03% for the other libraries. 1.8% of its fragments are 100 bp or shorter, versus 0.3–0.8%. This suggests more DNA fragmentation or a different size selection.",
-      action: "<b>Next:</b> compare mapping efficiency, duplication and coverage for T0_1 after alignment. So far its unique mapping (73.3%) is the higher of the two T0 libraries." },
-    { level: "warning", tag: "Sample quality",
-      title: "SsParrT0_2 has a high share of unaligned pairs",
-      body: "25.4% of <code>SsParrT0_2</code> pairs (17.3M) did not align anywhere, against 10.5% for <code>SsParrT0_1</code>, leaving 61.7% unique mapping (42.1M pairs, vs. 56.4M). Conversion is normal (CHH 0.4%) and reads split evenly between strands, so a conversion or library-direction problem is unlikely.",
-      action: "<b>Next:</b> compare with the two Vac libraries; if T0_2 stays the outlier, check the unaligned reads for contamination or low complexity." },
+      action: "<b>Confirmed in alignment:</b> its aligned fragments average 233 bp, against about 400 bp for the other three. <b>Next:</b> compare duplication and coverage after deduplication." },
+    { level: "resolved", tag: "Fixed, realigning",
+      title: "Fragments longer than Bismark's default pair limit",
+      body: "<code>SsParrT0_2</code> left 25.4% of pairs unaligned against 10.5% for <code>SsParrT0_1</code>. It was not contamination: mitochondria, phiX and <i>E. coli</i> were under 0.2% of reads, and the unaligned reads looked like normal converted salmon reads. In over a third of them, both mates mapped facing each other 500–1,000 bp apart, just past Bismark's 500 bp default. Most fragments in <code>SsParrT0_2</code>, <code>SsParrVac_1</code> and <code>SsParrVac_2</code> are about 400 bp long, and 14–17% are over 500. With a 1,000 bp limit, unique mapping on 100k-pair subsets was 72.6%, 72.5% and 72.0%.",
+      action: "<b>Handled:</b> all four libraries are being realigned with <code>--maxins 1000</code>." },
     { level: "info", tag: "Library chemistry",
       title: "Adaptase tail at the R2 5′ end",
       body: "The first ~15 bases of R2 are up to 85% G, and short-insert R1 reads carry the complementary C-rich stretch before the adapter. This is typical of adaptase-based kits such as Accel-NGS Methyl-Seq.",
@@ -325,13 +325,13 @@ const DATA = {
       body: "<code>Metadata.tsv</code> had Windows line endings, a leading space in “After vaccination” values, and no link between R1 and R2 files. Cleaned, with <code>Library</code> and <code>Read</code> columns added.",
       action: "" },
     { level: "info", tag: "Open question",
-      title: "Library kit and conversion control unknown",
-      body: "The prep kit, sequencing facility and any spike-in (lambda, pUC19) are not recorded. Conversion efficiency will be estimated from non-CpG methylation after alignment.",
-      action: "<b>Needed:</b> kit name and archive location for the data README." }
+      title: "Library kit unknown; lambda spike-in likely",
+      body: "The prep kit and sequencing facility are not recorded. Lambda phage DNA makes up 0.05–0.15% of pairs in both T0 libraries, with 0.4% non-CpG methylation, consistent with an unmethylated lambda spike-in used as a conversion control.",
+      action: "<b>Needed:</b> kit name, whether lambda was spiked in, and archive location for the data README." }
   ],
   samples: [
-    { lib: "SsParrT0_1",  cond: "Before", rep: 1, pairs: 77603127, fc: "22MGM5LT4 · 1", adapter: 6.04, dup: 21.4, mapping: 73.3, flag: true },
-    { lib: "SsParrT0_2",  cond: "Before", rep: 2, pairs: 68776693, fc: "22MG7GLT4 · 6", adapter: 0.89, dup: 24.7, mapping: 61.7 },
+    { lib: "SsParrT0_1",  cond: "Before", rep: 1, pairs: 77603127, fc: "22MGM5LT4 · 1", adapter: 6.04, dup: 21.4, flag: true },
+    { lib: "SsParrT0_2",  cond: "Before", rep: 2, pairs: 68776693, fc: "22MG7GLT4 · 6", adapter: 0.89, dup: 24.7 },
     { lib: "SsParrVac_1", cond: "After",  rep: 1, pairs: 69143094, fc: "22MG7GLT4 · 6", adapter: 1.03, dup: 24.1 },
     { lib: "SsParrVac_2", cond: "After",  rep: 2, pairs: 70172391, fc: "22MG7GLT4 · 6", adapter: 0.45, dup: 24.3 }
   ]
@@ -358,7 +358,7 @@ const kpis = [
   { label: "Libraries", value: DATA.samples.length, note: "2 before · 2 after vaccination" },
   { label: "Read pairs", value: (totalPairs / 1e6).toFixed(0) + "M", note: "2 × 151 bp, ~7–8× raw coverage each" },
   { label: "Pipeline steps done", value: doneSteps + " / " + DATA.steps.length, note: (DATA.steps.find((s) => s.status === "running") ? DATA.steps.find((s) => s.status === "running").title + " in progress" : DATA.steps.find((s) => s.status === "scheduled")?.title + " next") },
-  { label: "Open sample issues", value: openIssues, note: "Batch and insert size (T0_1); unaligned reads (T0_2)" }
+  { label: "Open sample issues", value: openIssues, note: "Batch and insert size, both T0_1" }
 ];
 $("kpis").innerHTML = kpis.map((k) =>
   `<div class="card kpi"><div class="label">${k.label}</div><div class="value">${k.value}</div><div class="note">${k.note}</div></div>`
