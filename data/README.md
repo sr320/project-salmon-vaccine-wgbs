@@ -57,7 +57,7 @@ Flowcell, lane, and index are the values seen in the headers of the first 100,00
 
 Each library is roughly 21 to 23 Gb of sequence, about 7× to 8× raw coverage of the ~3 Gb Atlantic salmon genome before trimming, deduplication, and mapping losses.
 
-**TODO:** library prep kit and conversion method, sequencing facility, where the raw data are archived (e.g. SRA/ENA accession or lab storage URL), any spike-in controls (lambda, pUC19) for estimating conversion efficiency.
+**TODO:** library prep kit and conversion method, sequencing facility, where the raw data are archived (e.g. SRA/ENA accession or lab storage URL), whether unmethylated lambda DNA was spiked in as a conversion control (the reads suggest it was; see note 6).
 
 ### Checksums (MD5)
 
@@ -98,3 +98,4 @@ From a review of the files on 2026-11-25:
 3. **R2 has a 5′ artifact.** R2 reads frequently begin with a `GGGAG`/`GGGA`-like motif, and at least some carry adapter sequence shortly after. Check the per-base content plots in FastQC and expect to hard-trim the 5′ end of R2 (and likely the 3′ end of R1) in addition to adapter trimming. The right number of bases depends on the library kit (TODO above).
 4. **Small design.** n = 2 per group limits differential methylation analysis to large, consistent effects.
 5. **FASTQ files are git-ignored.** The repository `.gitignore` excludes `data/*.fastq.gz`; only this README and `Metadata.tsv` are meant to be tracked.
+6. **Lambda phage DNA is present, probably as a spike-in.** In random 400,000-pair subsets of `SsParrT0_1` and `SsParrT0_2`, 0.15% and 0.05% of pairs aligned to the lambda genome (NC_001416.1) with Bismark. Methylation on the lambda reads is 0.24% at CpG, 0.27% at CHG and 0.40% at CHH (23,218 CHH calls), against about 85% CpG methylation in salmon. That is what an unmethylated spike-in looks like, and it puts conversion at about 99.6%. Other common sources were negligible: salmon mitochondria (NC_001960.1) 0.02–0.03%, phiX and *E. coli* under 0.01%. The Vac libraries were not checked. **TODO:** confirm with whoever made the libraries that lambda was added.
