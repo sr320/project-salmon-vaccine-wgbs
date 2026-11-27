@@ -278,7 +278,7 @@
 <script>
 /* ===== Update this block as the analysis moves forward ===== */
 const DATA = {
-  updated: "2026-11-26 19:35 PST, realignment in progress",
+  updated: "2026-11-27 15:35 PST, alignment done, M-bias running",
   steps: [
     { title: "Raw data and metadata", status: "done",
       detail: "4 paired-end libraries received; checksums recorded; <code>Metadata.tsv</code> cleaned." },
@@ -286,10 +286,10 @@ const DATA = {
       detail: "FastQC and MultiQC on all 8 FASTQ files. Bisulfite composition as expected; adaptase tail found at the R2 5′ end." },
     { title: "Trimming", status: "done",
       detail: "cutadapt: adapters and poly-G removed (q20); 15 bp clipped from R2 5′ and R1 3′. 99.1–99.4% of pairs and 87–89% of bases kept; adapter and overrepresented-sequence flags cleared in FastQC." },
-    { title: "Bismark alignment", status: "running", when: "Restarted Nov 26 19:33",
-      detail: "Realigning all four libraries with a 1,000 bp maximum fragment length (<code>--maxins 1000</code>). The first pass used Bismark's 500 bp default, which discarded the longer fragments in <code>SsParrT0_2</code> and the two Vac libraries (see findings). First-pass results for <code>SsParrT0_1</code> (73.3% unique) and <code>SsParrT0_2</code> (61.7%) are kept for reference. About 5 h per library on the loaded server, so all four should be done around the evening of Nov 27." },
-    { title: "Deduplication and M-bias check", status: "scheduled", when: "Starts after alignment",
-      detail: "<code>deduplicate_bismark</code> removes PCR duplicates, then the M-bias table shows methylation by read position to decide how many bases to ignore at read ends. Starts automatically via a cron trigger." },
+    { title: "Bismark alignment", status: "done", when: "Nov 27 15:23",
+      detail: "All four libraries aligned to Ssal_v3.1 with a 1,000 bp maximum fragment length (<code>--maxins 1000</code>). Unique mapping is 71.4–73.9% in every library, up from 61.7% for <code>SsParrT0_2</code> under Bismark's 500 bp default. About 4.5–6.5 h per library." },
+    { title: "Deduplication and M-bias check", status: "running", when: "Started Nov 27 15:30",
+      detail: "<code>deduplicate_bismark</code> removes PCR duplicates, then the M-bias table shows methylation by read position to decide how many bases to ignore at read ends. Started automatically by a cron trigger; runs one library at a time at low priority on the shared server, so it will likely take overnight." },
     { title: "Methylation extraction", status: "planned",
       detail: "Per-context calls (CpG, CHG, CHH), bedGraph, genome-wide CpG report and strand-merged CpG coverage for DMR tools, using the ignore settings chosen from M-bias. Conversion rate checked from CHH methylation." },
     { title: "Differential methylation", status: "planned", when: "Script ready",
@@ -304,10 +304,10 @@ const DATA = {
       title: "SsParrT0_1 has many more short inserts",
       body: "6.0% of its R1 reads run into adapter, against 0.45–1.03% for the other libraries. 1.8% of its fragments are 100 bp or shorter, versus 0.3–0.8%. This suggests more DNA fragmentation or a different size selection.",
       action: "<b>Confirmed in alignment:</b> its aligned fragments average 233 bp, against about 400 bp for the other three. <b>Next:</b> compare duplication and coverage after deduplication." },
-    { level: "resolved", tag: "Fixed, realigning",
+    { level: "resolved", tag: "Fixed",
       title: "Fragments longer than Bismark's default pair limit",
       body: "<code>SsParrT0_2</code> left 25.4% of pairs unaligned against 10.5% for <code>SsParrT0_1</code>. It was not contamination: mitochondria, phiX and <i>E. coli</i> were under 0.2% of reads, and the unaligned reads looked like normal converted salmon reads. In over a third of them, both mates mapped facing each other 500–1,000 bp apart, just past Bismark's 500 bp default. Most fragments in <code>SsParrT0_2</code>, <code>SsParrVac_1</code> and <code>SsParrVac_2</code> are about 400 bp long, and 14–17% are over 500. With a 1,000 bp limit, unique mapping on 100k-pair subsets was 72.6%, 72.5% and 72.0%.",
-      action: "<b>Handled:</b> all four libraries are being realigned with <code>--maxins 1000</code>." },
+      action: "<b>Handled:</b> all four libraries realigned with <code>--maxins 1000</code>. Unique mapping: <code>SsParrT0_1</code> 73.9%, <code>SsParrT0_2</code> 72.0% (was 61.7%), <code>SsParrVac_1</code> 72.2%, <code>SsParrVac_2</code> 71.4%." },
     { level: "info", tag: "Library chemistry",
       title: "Adaptase tail at the R2 5′ end",
       body: "The first ~15 bases of R2 are up to 85% G, and short-insert R1 reads carry the complementary C-rich stretch before the adapter. This is typical of adaptase-based kits such as Accel-NGS Methyl-Seq.",
@@ -316,10 +316,10 @@ const DATA = {
       title: "Two replicates per group",
       body: "With n = 2 per condition, only large and consistent methylation differences will be detectable, and one atypical library (T0_1) has outsized influence.",
       action: "<b>Next:</b> favour region-level tests and report effect sizes alongside p-values." },
-    { level: "info", tag: "Early check",
-      title: "Bisulfite conversion is efficient in both T0 libraries",
-      body: "Across the full alignments (2.6 and 2.0 billion cytosines), CHH and CHG methylation are 0.4% in both <code>SsParrT0_1</code> and <code>SsParrT0_2</code>, so conversion is about 99.6%. CpG methylation is 85.1% and 83.4%, typical for fish.",
-      action: "<b>Pending:</b> the same check for the two Vac libraries as they finish aligning." },
+    { level: "resolved", tag: "Checked",
+      title: "Bisulfite conversion is efficient in all four libraries",
+      body: "Across the full alignments (2.4–2.6 billion cytosines per library), CHG and CHH methylation are 0.4% in every library, so conversion is about 99.6%. CpG methylation is 85.1% and 83.3% in the T0 libraries and 82.3% and 81.8% after vaccination, typical for fish.",
+      action: "The small drop in CpG methylation after vaccination is not a result: n = 2 per group and <code>SsParrT0_1</code> is on its own run. It will be tested properly in the differential methylation step." },
     { level: "resolved", tag: "Resolved",
       title: "Sample sheet formatting fixed",
       body: "<code>Metadata.tsv</code> had Windows line endings, a leading space in “After vaccination” values, and no link between R1 and R2 files. Cleaned, with <code>Library</code> and <code>Read</code> columns added.",
@@ -330,10 +330,10 @@ const DATA = {
       action: "<b>Needed:</b> kit name, whether lambda was spiked in, and archive location for the data README." }
   ],
   samples: [
-    { lib: "SsParrT0_1",  cond: "Before", rep: 1, pairs: 77603127, fc: "22MGM5LT4 · 1", adapter: 6.04, dup: 21.4, flag: true },
-    { lib: "SsParrT0_2",  cond: "Before", rep: 2, pairs: 68776693, fc: "22MG7GLT4 · 6", adapter: 0.89, dup: 24.7 },
-    { lib: "SsParrVac_1", cond: "After",  rep: 1, pairs: 69143094, fc: "22MG7GLT4 · 6", adapter: 1.03, dup: 24.1 },
-    { lib: "SsParrVac_2", cond: "After",  rep: 2, pairs: 70172391, fc: "22MG7GLT4 · 6", adapter: 0.45, dup: 24.3 }
+    { lib: "SsParrT0_1",  cond: "Before", rep: 1, pairs: 77603127, fc: "22MGM5LT4 · 1", adapter: 6.04, dup: 21.4, mapping: 73.9, flag: true },
+    { lib: "SsParrT0_2",  cond: "Before", rep: 2, pairs: 68776693, fc: "22MG7GLT4 · 6", adapter: 0.89, dup: 24.7, mapping: 72.0 },
+    { lib: "SsParrVac_1", cond: "After",  rep: 1, pairs: 69143094, fc: "22MG7GLT4 · 6", adapter: 1.03, dup: 24.1, mapping: 72.2 },
+    { lib: "SsParrVac_2", cond: "After",  rep: 2, pairs: 70172391, fc: "22MG7GLT4 · 6", adapter: 0.45, dup: 24.3, mapping: 71.4 }
   ]
 };
 /* ========================================================== */

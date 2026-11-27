@@ -26,9 +26,13 @@ LIBS="SsParrT0_1 SsParrT0_2 SsParrVac_1 SsParrVac_2"
 
 # Per-library parallelism: --parallel N runs N Bismark instances, each
 # running 2 bowtie2 processes (directional) with -p threads, so roughly
-# N * 2 * P cores plus overhead. 8 * 2 * 2 = 32 bowtie2 threads.
-PARALLEL=8
-BT2_THREADS=2
+# N * 2 * P cores plus overhead. 3 * 2 * 2 = 12 bowtie2 threads.
+# raven is a shared machine: keep this modest and run at the lowest CPU
+# priority. (The Nov 2026 alignment used PARALLEL=8, about 5 h per library;
+# expect roughly twice that now.)
+renice -n 19 -p $$ >/dev/null
+PARALLEL=${PARALLEL:-3}
+BT2_THREADS=${BT2_THREADS:-2}
 
 # Maximum insert (fragment) length for a valid pair. Bismark's default of
 # 500 bp discarded 10-17% of pairs in SsParrT0_2 and both Vac libraries,
@@ -61,7 +65,7 @@ if [ ! -d "$GENOME_DIR/Bisulfite_Genome" ]; then
   mkdir -p "$GENOME_DIR"
   ln -sf "$GENOME_FA" "$GENOME_DIR/Ssal_v3.1.fa.gz"
   echo "building bisulfite index $(date)"
-  bismark_genome_preparation --verbose --parallel 16 \
+  bismark_genome_preparation --verbose --parallel 4 \
     --path_to_aligner "$BOWTIE2" "$GENOME_DIR"
   echo "index built $(date)"
 fi
