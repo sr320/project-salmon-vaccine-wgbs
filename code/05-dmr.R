@@ -63,7 +63,10 @@ DMR_DELTA   <- env_num("DMR_DELTA", 0.1)  # minimum mean difference for a DMR
 DMR_MIN_LEN <- env_num("DMR_MIN_LEN", 50)
 DMR_MIN_CPG <- env_num("DMR_MIN_CPG", 3)
 DMR_MERGE   <- env_num("DMR_MERGE", 100)  # merge DMRs closer than this (bp)
-CORES   <- env_num("CORES", 8)
+CORES   <- env_num("CORES", 4)
+
+# raven is a shared machine: run at the lowest CPU priority.
+invisible(tools::psnice(value = 19))
 
 samples <- data.table(
   id        = c("SsParrT0_1", "SsParrT0_2", "SsParrVac_1", "SsParrVac_2"),

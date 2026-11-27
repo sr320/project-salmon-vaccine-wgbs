@@ -42,9 +42,11 @@ OUT=$REPO/output/04-methylation
 DEDUP=$OUT/dedup
 LIBS="SsParrT0_1 SsParrT0_2 SsParrVac_1 SsParrVac_2"
 
-# The extractor with --parallel N uses about 3N cores; libraries run one
-# at a time.
-PARALLEL=${PARALLEL:-8}
+# raven is a shared machine: run at the lowest CPU priority and keep the
+# core count modest. The extractor with --parallel N uses about 3N cores;
+# libraries run one at a time.
+renice -n 19 -p $$ >/dev/null
+PARALLEL=${PARALLEL:-3}
 BUFFER=${BUFFER:-20G}
 
 IGNORE_R1=${IGNORE_R1:-0}
