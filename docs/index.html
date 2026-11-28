@@ -278,7 +278,7 @@
 <script>
 /* ===== Update this block as the analysis moves forward ===== */
 const DATA = {
-  updated: "2026-11-27 19:45 PST, M-bias done",
+  updated: "2026-11-27 19:55 PST, extraction running",
   steps: [
     { title: "Raw data and metadata", status: "done",
       detail: "4 paired-end libraries received; checksums recorded; <code>Metadata.tsv</code> cleaned." },
@@ -290,8 +290,8 @@ const DATA = {
       detail: "All four libraries aligned to Ssal_v3.1 with a 1,000 bp maximum fragment length (<code>--maxins 1000</code>). Unique mapping is 71.4–73.9% in every library, up from 61.7% for <code>SsParrT0_2</code> under Bismark's 500 bp default. About 4.5–6.5 h per library." },
     { title: "Deduplication and M-bias check", status: "done", when: "Nov 27 19:39",
       detail: "<code>deduplicate_bismark</code> removed 4.9% of aligned pairs in <code>SsParrT0_1</code> and 13.9–15.6% in the other three, leaving 42–54 million unique pairs per library. The M-bias tables show methylation by read position (see findings for the suggested ignore settings). About 1 h per library at low priority." },
-    { title: "Methylation extraction", status: "scheduled", when: "Awaiting approval of ignore settings",
-      detail: "Per-context calls (CpG, CHG, CHH), bedGraph, genome-wide CpG report and strand-merged CpG coverage for DMR tools, using the ignore settings chosen from M-bias (suggested: <code>IGNORE_R1=4 IGNORE_R2=8 IGNORE_3P_R2=1</code>). Conversion rate checked from CHH methylation." },
+    { title: "Methylation extraction", status: "running", when: "Started Nov 27 19:49",
+      detail: "Per-context calls (CpG, CHG, CHH), bedGraph, genome-wide CpG report and strand-merged CpG coverage for DMR tools, ignoring read-end bases flagged by M-bias (<code>IGNORE_R1=4 IGNORE_R2=8 IGNORE_3P_R2=1</code>). Runs one library at a time at low priority; likely overnight or longer. Conversion rate checked from CHH methylation." },
     { title: "Differential methylation", status: "planned", when: "Script ready",
       detail: "DSS with smoothing compares Vac with T0 (n = 2 per group) on CpGs with ≥ 5 reads in all four libraries. Calls single CpGs (difference > 25 points, posterior ≥ 0.999) and regions (≥ 3 CpGs, ≥ 50 bp, ≥ 10-point difference). Each call is flagged when both Vac replicates sit on the same side of both T0 replicates, the more reliable subset at this sample size. Sample correlation and PCA come first, to check the T0_1 batch. The batch cannot be modeled because it falls entirely in the T0 group." }
   ],
@@ -308,10 +308,10 @@ const DATA = {
       title: "Fragments longer than Bismark's default pair limit",
       body: "<code>SsParrT0_2</code> left 25.4% of pairs unaligned against 10.5% for <code>SsParrT0_1</code>. It was not contamination: mitochondria, phiX and <i>E. coli</i> were under 0.2% of reads, and the unaligned reads looked like normal converted salmon reads. In over a third of them, both mates mapped facing each other 500–1,000 bp apart, just past Bismark's 500 bp default. Most fragments in <code>SsParrT0_2</code>, <code>SsParrVac_1</code> and <code>SsParrVac_2</code> are about 400 bp long, and 14–17% are over 500. With a 1,000 bp limit, unique mapping on 100k-pair subsets was 72.6%, 72.5% and 72.0%.",
       action: "<b>Handled:</b> all four libraries realigned with <code>--maxins 1000</code>. Unique mapping: <code>SsParrT0_1</code> 73.9%, <code>SsParrT0_2</code> 72.0% (was 61.7%), <code>SsParrVac_1</code> 72.2%, <code>SsParrVac_2</code> 71.4%." },
-    { level: "warning", tag: "Decision needed",
+    { level: "resolved", tag: "Decided",
       title: "M-bias: ignore a few bases at the read ends before extraction",
       body: "The same pattern appears in all four libraries. <b>R1 5′ end:</b> CpG methylation is 9–12 points low at position 1, 3–4 points high at position 3 and about 1 point low at 4, then flat. <b>R2 5′ end:</b> CpG methylation starts 2–4 points low and CHH methylation 1.4–3.3% (against 0.4% elsewhere), both settling by position 8–9, which is leftover end-repair or adaptase fill-in past the 15 bp already trimmed. <b>R2 3′ end:</b> the last base (position 136) reads as 0% methylated in every context, an artifact. The R1 3′ end is flat.",
-      action: "<b>Suggested:</b> <code>IGNORE_R1=4 IGNORE_R2=8 IGNORE_3P_R2=1</code> (R1 3′ end: 0). This drops about 5% of called bases (13 of 272 positions per pair). Extraction starts once these are approved." },
+      action: "<b>Approved and applied:</b> <code>IGNORE_R1=4 IGNORE_R2=8 IGNORE_3P_R2=1</code> (R1 3′ end: 0). This drops about 5% of called bases (13 of 272 positions per pair)." },
     { level: "info", tag: "Sample quality",
       title: "SsParrT0_1 has far fewer PCR duplicates",
       body: "Deduplication removed 4.9% of aligned pairs in <code>SsParrT0_1</code> against 13.9–15.6% in the other three. With its short inserts and separate sequencing run, this points to a more complex library, likely from a different input amount or prep batch. It also leaves <code>SsParrT0_1</code> with the most unique pairs (54M against 42–43M).",
@@ -366,7 +366,7 @@ const kpis = [
   { label: "Libraries", value: DATA.samples.length, note: "2 before · 2 after vaccination" },
   { label: "Read pairs", value: (totalPairs / 1e6).toFixed(0) + "M", note: "2 × 151 bp, ~7–8× raw coverage each" },
   { label: "Pipeline steps done", value: doneSteps + " / " + DATA.steps.length, note: (DATA.steps.find((s) => s.status === "running") ? DATA.steps.find((s) => s.status === "running").title + " in progress" : DATA.steps.find((s) => s.status === "scheduled")?.title + " next") },
-  { label: "Open issues", value: openIssues, note: "T0_1 batch and inserts; M-bias settings" }
+  { label: "Open issues", value: openIssues, note: "Batch and insert size, both T0_1" }
 ];
 $("kpis").innerHTML = kpis.map((k) =>
   `<div class="card kpi"><div class="label">${k.label}</div><div class="value">${k.value}</div><div class="note">${k.note}</div></div>`
