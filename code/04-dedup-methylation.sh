@@ -19,8 +19,8 @@
 #   IGNORE_R2     5' end of R2        IGNORE_3P_R2  3' end of R2
 #
 # Deduplication is skipped for a library whose deduplicated BAM already
-# exists, and extraction is skipped when its CpG report exists, so the
-# script can be re-run after an interruption.
+# exists, and extraction is skipped when its merged CpG coverage file
+# exists, so the script can be re-run after an interruption.
 #
 # Output: output/04-methylation/   Log: output/04-methylation/04-<mode>.log
 set -euo pipefail
@@ -93,7 +93,7 @@ for l in $LIBS; do
   fi
 
   # 2b. Full extraction.
-  report=$OUT/${l}_1.trimmed_bismark_bt2_pe.deduplicated.CpG_report.txt.gz
+  report=$OUT/${l}.CpG.CpG_report.merged_CpG_evidence.cov.gz
   if [ -s "$report" ]; then
     echo "$l already extracted, skipping"; continue
   fi
@@ -101,12 +101,14 @@ for l in $LIBS; do
   bismark_methylation_extractor --paired-end --no_overlap --comprehensive \
     "${ignore_opts[@]}" \
     --gzip --bedGraph --buffer_size "$BUFFER" \
-    --cytosine_report --genome_folder "$GENOME_DIR" \
     --parallel "$PARALLEL" --samtools_path "$SAMTOOLS" \
     -o "$OUT" "$ddbam"
 
-  # 3. Strand-merged CpG coverage (one row per CpG dinucleotide), the usual
-  #    input for methylKit / DSS / dmrseq.
+  # 3. Genome-wide CpG report (<lib>.CpG.CpG_report.txt.gz) and the
+  #    strand-merged CpG coverage (one row per CpG dinucleotide) used by DSS.
+  #    Run here rather than through the extractor's --cytosine_report, which
+  #    in Bismark 0.24.0 cannot merge strands and would write the same
+  #    genome-wide report a second time (~1 h and 435 MB per library).
   cov=$OUT/${l}_1.trimmed_bismark_bt2_pe.deduplicated.bismark.cov.gz
   coverage2cytosine --merge_CpG --gzip --genome_folder "$GENOME_DIR" \
     --dir "$OUT" -o "${l}.CpG" "$cov"
